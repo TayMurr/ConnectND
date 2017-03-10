@@ -6,6 +6,8 @@ Notre Dame Student Networks
 List of NetIDs of all students, faculty, and staff associated with Notre Dame. 
 Contains invalid IDs. 
 
+        $ cat /afs/nd.edu/common/etc/passwd | grep -E /afs/nd.edu | grep -Ev ^esqa | cut -d ':' -f 1 | sort | uniq > netid.txt
+
 
 **req\_students.py**: 
 
