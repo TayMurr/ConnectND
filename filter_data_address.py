@@ -24,6 +24,8 @@ if __name__ == "__main__":
 
 	all_department = {}
 
+	all_jobs = {}
+
 	# Loop through the key value pair in dictionary "student_dir" to get dorm or homestate
 	for student, info in student_dir.items():
 
@@ -67,16 +69,54 @@ if __name__ == "__main__":
 		year = info["ndlevel"]
 		all_years[year] = all_years.get(year, 0) + 1
 
-		college = info["ndtoplevelprimarydepartment"]
-		all_colleges[college] = all_colleges.get(college, 0 ) + 1
+		# Combine college and curriculum
+		college = set()
 
-		curriculum = info["ndcurriculum"]
-		all_curriculum[curriculum] = all_curriculum.get(curriculum, 0) + 1
+		if "ndtoplevelprimarydepartment" in info.keys():
+			college.add(info["ndtoplevelprimarydepartment"])
+			del student_dir[student]["ndtoplevelprimarydepartment"]
+		if "ndcurriculum" in info.keys():
+			college.add(info["ndcurriculum"])
+			del student_dir[student]["ndcurriculum"]
 
+		student_dir[student]["college"] = college
+
+		for c in college:
+			all_colleges[c] = all_colleges.get(c, 0 ) + 1
+
+		# Combine work departments
+		work_department = set() # set to hold student work departments
+		if "nddepartment" in info.keys():
+			depart = info["nddepartment"]
+			work_department.add(depart)
+			del student_dir[student]["nddepartment"]
 		if "departmentnumber" in info.keys():
 			depart = info["departmentnumber"]
-			all_department[depart] = all_department.get(depart, 0) + 1
+			work_department.add(depart)
+			del student_dir[student]["departmentnumber"]
 
+		student_dir[student]["workdepartment"] = work_department
+		
+		for w in work_department:
+			all_department[w] = all_department.get(w, 0) + 1
+
+		# Combine student jobs
+		jobs = set() # set to hold student jobs 
+		if "ndtitle" in info.keys():
+			jobs.add( info["ndtitle"] )
+			del student_dir[student]["ndtitle"] 
+		if "title" in info.keys():
+			jobs.add( info["title"])
+			del student_dir[student]["title"]
+		if "ndadditionaltitleinfo" in info.keys():
+			jobs.add( info["ndadditionaltitleinfo"])
+			del student_dir[student]["ndadditionaltitleinfo"]
+
+		student_dir[student]["jobs"] = jobs # Create new key "jobs" with value of a set of jobs
+
+		# Add count to dictionary all_jobs
+		for job in jobs:
+			all_jobs[job] = all_jobs.get(job, 0) + 1
 
 	print "Size of student directory: {}".format(len(student_dir))
 
@@ -104,4 +144,8 @@ if __name__ == "__main__":
 	
 	print "\nWork department:"
 	for key, value in sorted(all_department.items(), key=operator.itemgetter(1)):
+		print key, value
+
+	print "\nJob title:"
+	for key, value in sorted(all_jobs.items(), key=operator.itemgetter(1)):
 		print key, value
