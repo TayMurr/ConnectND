@@ -10,7 +10,7 @@ from PyQt4 import QtGui, QtCore
 class ConnectND(QtGui.QWidget):
 	
 	def __init__(self):
-		super(ConnectNd, self).__init__()
+		super(ConnectND, self).__init__()
 		self.initUI()
 		
 	def initUI(self):	  
