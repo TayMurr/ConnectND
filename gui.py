@@ -5,7 +5,15 @@
 # Author: Alan Flores
 import sys
 from PyQt4 import QtGui, QtCore
-
+import networkx as nx
+import matplotlib.pyplot as plt
+from matplotlib.pyplot import figure
+import matplotlib.cbook as cbook
+import matplotlib.mlab as mlab
+import string
+import json
+import numpy as np
+from random import randint
 
 class ConnectND(QtGui.QWidget):
 	
@@ -14,7 +22,7 @@ class ConnectND(QtGui.QWidget):
 		self.initUI()
 		
 	def initUI(self):	  
-		dmcb = QTGui.QCheckBox('Dorm', self) # setting checkboxes
+		dmcb = QtGui.QCheckBox('Dorm', self) # setting checkboxes
 		dmcb.move(400, 50)
 		dmcb.toggle()
 		dmcb.stateChanged.connect(self.changeBool1)
@@ -76,6 +84,6 @@ class ConnectND(QtGui.QWidget):
 			hs = False
 		
 if __name__ == '__main__':
-	app = QApplication(sys.argv)
+	app = QtGui.QApplication(sys.argv)
 	CND = ConnectND()
 	sys.exit(app.exec_())
