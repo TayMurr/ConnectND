@@ -12,7 +12,7 @@ import numpy as np
 from random import randint
 
 # dummy data to narrow down dictionary
-keys = ['ndlevel', 'postaladdress', 'ndtoplevelprimarydepartment', 'ndcurriculum']
+keys = ['dorm']
 pos1 = {}
 Ego_id =''
 class Annotate(object):
@@ -49,7 +49,7 @@ class Annotate(object):
                 if np.abs(x - pos1[node][0]) < 0.01 and np.abs( y - pos1[node][1]) < 0.01:
                     annotation = self.annotations[node]
                     annotation.set_visible(True)
-                    print '{} is positioned at {}, {}'.format(node, x, y)
+                    #print '{} is positioned at {}, {}'.format(node, x, y)
                     event.canvas.draw()
 
 
@@ -78,15 +78,15 @@ def remove_connection(G, connection):
 if __name__=='__main__':
 
     # reads json string from ND_directory.json returns list 
-    with open('ND_directory.json') as f:
-        student_dir_list = json.load(f)
+    with open('ND_complete_directory.json') as f:
+        student_big_dir = json.load(f)
 
     student_dir = {}
 
-    for student in student_dir_list:
+    for student in student_big_dir:
         try:
-            if set(keys).issubset(set(student.keys())):
-                student_dir[student["uid"]] = student
+            if set(keys).issubset(set(student_big_dir[student].keys())):
+                student_dir[student_big_dir[student]["uid"]] = student_big_dir[student]
         except:
             pass
     
@@ -99,15 +99,15 @@ if __name__=='__main__':
     
     G = nx.Graph()
     
-    connection = ''
-    connection_Num = 0
+    #connection = ''
+    #connection_Num = 0
     for student in student_dir:
-        if Ego['ndlevel'] == student_dir[student]['ndlevel']:
+        if Ego["dorm"] == student_dir[student]["dorm"]:
             G.add_edge(Ego_id, student)
-            G.node[student]['ndlevel'] = 'ndlevel'
-            connection_Num = connection_Num + 1
-            G.edge[Ego_id][student]['connection4'] = 'ndcurriculum'
-        if Ego['postaladdress'] == student_dir[student]['postaladdress']:
+            #G.node[student]['ndlevel'] = 'ndlevel'
+            #connection_Num = connection_Num + 1
+            #G.edge[Ego_id][student]['connection4'] = 'ndcurriculum'
+        '''if Ego['postaladdress'] == student_dir[student]['postaladdress']:
             G.add_edge(Ego_id, student)
             G.node[student]['postaladdress'] = 'postaladdress'
             connection_Num = connection_Num + 1
@@ -123,7 +123,7 @@ if __name__=='__main__':
             connection_Num = connection_Num + 1
             G.edge[Ego_id][student]['connection4'] = 'ndcurriculum'
         if connection_Num < 2 and connection_Num > 0:
-            G.remove_node(student)
+            G.remove_node(student)'''
     
   
 
