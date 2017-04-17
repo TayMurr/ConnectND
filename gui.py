@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/python2.7
 # -*- coding: utf-8 -*-
 # gui.py
 # GUI for the ConnectND app
@@ -45,9 +45,9 @@ G = nx.Graph()
 #print student_dir["amonn"]["dorm"]
 #connection = ''
 #connection_Num = 0
-for student in student_dir:
-	if Ego["dorm"] == student_dir[student]["dorm"]:
-		G.add_edge(Ego_id, student)
+#for student in student_dir:
+#	if Ego["dorm"] == student_dir[student]["dorm"]:
+#		G.add_edge(Ego_id, student)
 	    #G.node[student]['ndlevel'] = 'ndlevel'
 	    #connection_Num = connection_Num + 1
 	    #G.edge[Ego_id][student]['connection4'] = 'ndcurriculum'
@@ -93,7 +93,17 @@ class Annotate(object):
                     #print '{} is positioned at {}, {}'.format(node, x, y)
 				event.canvas.draw()
 
-
+def draw_graph(ax):
+	pos = nx.random_layout(G)
+	pos1.update(pos)
+	labels = {}
+	labels[Ego_id] = Ego_id
+	print ax
+	nx.draw(G, pos, node_color = '#0C2340', edge_color = '#bbbec1', node_size = 10, with_label = False)
+	nx.draw_networkx_nodes(G, pos, nodelist = [Ego_id], node_size = 100, node_color = '#C89600')
+	nx.draw_networkx_labels(G, pos, labels, font_size = 12)
+	#af= Annotate(G, ax=ax)
+	
 
 
 class ConnectND(QtGui.QWidget):
@@ -102,14 +112,14 @@ class ConnectND(QtGui.QWidget):
 		super(ConnectND, self).__init__()
 		self.initUI()
 		#pos1 = {}
-		pos = nx.random_layout(G)
-		labels = {}
-		labels[Ego_id] = Ego_id
-		nx.draw(G, pos,  node_color ='#0C2340', edge_color = '#bbbec1', node_size = 10, with_labels=False, ax=self.ax)
-		nx.draw_networkx_nodes(G, pos, nodelist = [Ego_id], node_size = 100, node_color = '#C89600', ax=self.ax)
-		nx.draw_networkx_labels(G, pos, labels, font_size = 12, ax=self.ax)
+		#pos = nx.random_layout(G)
+		#labels = {}
+		#labels[Ego_id] = Ego_id
+		#nx.draw(G, pos,  node_color ='#0C2340', edge_color = '#bbbec1', node_size = 10, with_labels=False, ax=self.ax)
+		#nx.draw_networkx_nodes(G, pos, nodelist = [Ego_id], node_size = 100, node_color = '#C89600', ax=self.ax)
+		#nx.draw_networkx_labels(G, pos, labels, font_size = 12, ax=self.ax)
 
-		pos1.update(pos)
+		#pos1.update(pos)
 		#print G.nodes()
 		af = Annotate(G, ax=self.ax)
 		self.fig.canvas.mpl_connect('motion_notify_event', af)
@@ -117,12 +127,13 @@ class ConnectND(QtGui.QWidget):
 		
 	def initUI(self):
                 self.fig = plt.figure()
+		#plt.close(self.fig)
                 self.canvas = FigureCanvas(self.fig)
 		self.ax = self.fig.add_subplot(111)
-		self.canvas.draw()
+		#self.canvas.draw()
 		dmcb = QtGui.QCheckBox('Dorm', self) # setting checkboxes
 		dmcb.move(400, 50)
-		dmcb.toggle()
+		#dmcb.toggle()
 		dmcb.stateChanged.connect(self.changeBool1)
 		clcb = QtGui.QCheckBox('College', self)
 		clcb.move(400, 100)
@@ -146,16 +157,16 @@ class ConnectND(QtGui.QWidget):
 		layout.addWidget(nacb)
 		self.setLayout(layout)
 
-		self.show()
-
-		
+		#self.show()
+	
 	def changeBool1(self, state): # function for a checkbox
 		if state == QtCore.Qt.Checked:
 			dm = True
 		    # create node and edge and set node attributes
 			for student in student_dir:
 				if Ego["dorm"] == student_dir[student]["dorm"]:
-					G.add_edge(Ego_id, student) 
+					G.add_edge(Ego_id, student)
+					G.node[student]["dorm"] = "dorm"
 		else:
 			dm = False
 			delete_nodes = []
@@ -165,7 +176,14 @@ class ConnectND(QtGui.QWidget):
 						delete_nodes.append(node_1)
 				except:
 					pass
+			#print delete_nodes
 			G.remove_nodes_from(delete_nodes)
+			#plt.show()
+		self.fig.clf()
+		draw_graph(self.ax)
+		print pos1
+		af = Annotate(G, ax=self.ax)
+                self.fig.canvas.mpl_connect('motion_notify_event', af)
 		self.canvas.draw()
 
 	def changeBool2(self, state):
@@ -184,6 +202,7 @@ class ConnectND(QtGui.QWidget):
                         	except:
                                 	pass
                         G.remove_nodes_from(delete_nodes)
+		draw_graph()
 		self.canvas.draw()
 
 	def changeBool3(self, state):
@@ -202,6 +221,7 @@ class ConnectND(QtGui.QWidget):
 				except:
                                 	pass
                         G.remove_nodes_from(delete_nodes)
+		draw_graph()
 		self.canvas.draw()
 
 	def changeBool4(self, state):
@@ -220,6 +240,7 @@ class ConnectND(QtGui.QWidget):
 				except:
                                 	pass
                         G.remove_nodes_from(delete_nodes)
+		draw_graph()
 		self.canvas.draw()
 
 '''	def changeBool5(self, state):
