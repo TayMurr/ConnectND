@@ -25,7 +25,7 @@ class DirectoryController(object):
 		'''Retrieve everything in directory'''
 		output = {'result': 'success'}
 		try: 
-			output['all_students'] = self.sd
+			output['all_students'] = self.sd.get_all()
 		except Exception as ex:
 			output['result'] = 'error'
 			output['message'] = str(ex)
