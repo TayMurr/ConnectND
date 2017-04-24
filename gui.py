@@ -45,17 +45,17 @@ G = nx.Graph()
 #print student_dir["amonn"]["dorm"]
 #connection = ''
 #connection_Num = 0
-#for student in student_dir:
-#	if Ego["dorm"] == student_dir[student]["dorm"]:
-#		G.add_edge(Ego_id, student)
-	    #G.node[student]['ndlevel'] = 'ndlevel'
-	    #connection_Num = connection_Num + 1
-	    #G.edge[Ego_id][student]['connection4'] = 'ndcurriculum'
+for student in student_dir:
+	if Ego["dorm"] == student_dir[student]["dorm"]:
+		G.add_edge(Ego_id, student)
+		G.node[student]['dorm'] = 'dorm'
+		#connection_Num = connection_Num + 1
+		#G.edge[Ego_id][student]['connection4'] = 'ndcurriculum'
 
 
 class Annotate(object):
 	"""Annoate when rolling over a node"""
-	def __init__(self,G, ax=None):
+	def __init__(self, ax=None):
 		if ax is None:
 			self.ax = plt.gca()
 		else:
@@ -64,9 +64,6 @@ class Annotate(object):
 		self.annotations = {} # create dicionary of annotations with nodes as keys
 		#print G.nodes()
 		for node in G.nodes():
-			#print student_dir[node]["dorm"]
-			#print 'positions dict'
-			#print pos1
 			self.annotations[node] = self.annotate(node, pos1[node][0], pos1[node][1])
 
 	def annotate(self, node, x1, y1):
@@ -81,48 +78,53 @@ class Annotate(object):
 		return annotation
 
 	def __call__(self, event):
+		print 'debug'
+		# reset annotations
+		for node in G.nodes():
+			self.annotations[node] = self.annotate(node, pos1[node][0], pos1[node][1])
+		
 		x, y = event.xdata, event.ydata
 		if x is not None:
-            # make the other annotations invisible
-			for ann in self.annotations.values():
-				ann.set_visible(False)
-		for node in pos1:
-			if np.abs(x - pos1[node][0]) < 0.01 and np.abs( y - pos1[node][1]) < 0.01:
-				annotation = self.annotations[node]
-				annotation.set_visible(True)
-                    #print '{} is positioned at {}, {}'.format(node, x, y)
-				event.canvas.draw()
+
+            		#make call annotatiosn invisible
+			print 'annotations get set o false'
+			for ann in self.annotations:
+				annotations = self.annotations[ann]
+				print annotations
+				print "{}'s annotation was made false".format(ann)
+				annotations.set_visible(False)
+
+			#for ann_2 in self.annotations:
+				#if 				
+		#print self.annotations
+			for node in self.annotations:
+				if np.abs(x - pos1[node][0]) < 0.01 and np.abs( y - pos1[node][1]) < 0.01:
+					print "near {}".format(node)
+					annotation = self.annotations[node]
+					annotation.set_visible(True)
+                    	#print '{} is positioned at {}, {}'.format(node, x, 
+					event.canvas.draw()
 
 def draw_graph(ax):
 	pos = nx.random_layout(G)
 	pos1.update(pos)
 	labels = {}
 	labels[Ego_id] = Ego_id
-	print ax
+	
 	nx.draw(G, pos, node_color = '#0C2340', edge_color = '#bbbec1', node_size = 10, with_label = False)
 	nx.draw_networkx_nodes(G, pos, nodelist = [Ego_id], node_size = 100, node_color = '#C89600')
 	nx.draw_networkx_labels(G, pos, labels, font_size = 12)
-	#af= Annotate(G, ax=ax)
 	
-
-
 class ConnectND(QtGui.QWidget):
 	
 	def __init__(self):
 		super(ConnectND, self).__init__()
 		self.initUI()
-		#pos1 = {}
-		#pos = nx.random_layout(G)
-		#labels = {}
-		#labels[Ego_id] = Ego_id
 		#nx.draw(G, pos,  node_color ='#0C2340', edge_color = '#bbbec1', node_size = 10, with_labels=False, ax=self.ax)
 		#nx.draw_networkx_nodes(G, pos, nodelist = [Ego_id], node_size = 100, node_color = '#C89600', ax=self.ax)
-		#nx.draw_networkx_labels(G, pos, labels, font_size = 12, ax=self.ax)
-
-		#pos1.update(pos)
-		#print G.nodes()
-		af = Annotate(G, ax=self.ax)
-		self.fig.canvas.mpl_connect('motion_notify_event', af)
+		draw_graph(self.ax)	
+		self.af = Annotate(ax=self.ax)
+		self.fig.canvas.mpl_connect('motion_notify_event', self.af)
 
 		
 	def initUI(self):
@@ -157,7 +159,6 @@ class ConnectND(QtGui.QWidget):
 		layout.addWidget(nacb)
 		self.setLayout(layout)
 
-		#self.show()
 	
 	def changeBool1(self, state): # function for a checkbox
 		if state == QtCore.Qt.Checked:
@@ -180,11 +181,9 @@ class ConnectND(QtGui.QWidget):
 			G.remove_nodes_from(delete_nodes)
 			#plt.show()
 		self.fig.clf()
-		draw_graph(self.ax)
-		print pos1
-		af = Annotate(G, ax=self.ax)
-                self.fig.canvas.mpl_connect('motion_notify_event', af)
-		self.canvas.draw()
+		draw_graph(self.ax)	
+		self.fig.canvas.draw()
+
 
 	def changeBool2(self, state):
 		if state == QtCore.Qt.Checked:
@@ -192,6 +191,7 @@ class ConnectND(QtGui.QWidget):
                         for student in student_dir:
                                 if Ego["college"] == student_dir[student]["college"]:
                                         G.add_edge(Ego_id, student)
+					G.node[student]["college"] = "college"
 		else:
 			cg = False
                         delete_nodes = []
@@ -202,8 +202,11 @@ class ConnectND(QtGui.QWidget):
                         	except:
                                 	pass
                         G.remove_nodes_from(delete_nodes)
-		draw_graph()
-		self.canvas.draw()
+		self.fig.clf()
+		draw_graph(self.ax)
+                af = Annotate(G, ax=self.ax)
+                self.fig.canvas.mpl_connect('motion_notify_event', af)
+                self.canvas.draw()
 
 	def changeBool3(self, state):
 		if state == QtCore.Qt.Checked:
@@ -211,6 +214,7 @@ class ConnectND(QtGui.QWidget):
                         for student in student_dir:
                                 if Ego["ndlevel"] == student_dir[student]["ndlevel"]:
                                         G.add_edge(Ego_id, student)
+					G.node[student]["ndlevel"] = "ndlevel"
 		else:
 			nl = False
                         delete_nodes = []
@@ -221,8 +225,11 @@ class ConnectND(QtGui.QWidget):
 				except:
                                 	pass
                         G.remove_nodes_from(delete_nodes)
-		draw_graph()
-		self.canvas.draw()
+		self.fig.clf()
+                draw_graph(self.ax)
+                af = Annotate(G, ax=self.ax)
+                self.fig.canvas.mpl_connect('motion_notify_event', af)
+                self.canvas.draw()
 
 	def changeBool4(self, state):
 		if state == QtCore.Qt.Checked:
@@ -230,6 +237,7 @@ class ConnectND(QtGui.QWidget):
                         for student in student_dir:
                                 if Ego["ndaffiliation"] == student_dir[student]["ndaffiliation"]:
                                         G.add_edge(Ego_id, student)
+					G.node[student]["ndaffiliation"] = "ndaffiliation"
 		else:
 			na = False
                         delete_nodes = []
@@ -240,8 +248,11 @@ class ConnectND(QtGui.QWidget):
 				except:
                                 	pass
                         G.remove_nodes_from(delete_nodes)
-		draw_graph()
-		self.canvas.draw()
+		self.fig.clf()
+                draw_graph(self.ax)
+                af = Annotate(G, ax=self.ax)
+                self.fig.canvas.mpl_connect('motion_notify_event', af)
+                self.canvas.draw()
 
 '''	def changeBool5(self, state):
 		if state == QtCore.Qt.Checked:
