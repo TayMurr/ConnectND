@@ -1,4 +1,7 @@
 #!/usr/bin/env python2.7
+# Filtering the data pulled from ND Online Directory
+# Author: Mimi Chen
+
 import json
 
 # Keys that a student must have to be defined as a complete user

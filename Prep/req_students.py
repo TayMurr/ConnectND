@@ -1,4 +1,6 @@
 #!/usr/bin/env python2.7
+# Make request to ND Online directory using multiprocessing
+# Author: Mimi Chen
 
 import requests
 import json

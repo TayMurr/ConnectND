@@ -1,4 +1,6 @@
 #!/usr/bin/env python2.7
+# Program to analyze the data inside our database
+# Author: Mimi Chen
 import json
 
 def print_all_keys(keys):
