@@ -22,7 +22,6 @@ import requests
 CONNECTIONS = ['dorm', 'homestate']
 ALL_DORMS = ["Carroll Hall", "Knott Hall", "Flaherty Hall", "Sorin Hall", "Howard Hall", "Duncan Hall", "Breen-Phillips Hall", "Siegfried Hall", "Flanner Hall","Fisher Hall", "Badin Hall", "Lyons Hall", "Cavanaugh Hall", "Morrissey Hall","Pasquerilla West Hall", "McGlinn Hall", "Lewis Hall", "Dillon Hall", "Farley Hall", "Pasquerilla East Hall", "Welsh Family Hall", "O'Neill Hall", "Stanford Hall", "Keenan Hall", "Zahm Hall", "Keough Hall", "St. Edward's Hall","Dunne Hall", "Pangborn Hall", "Alumni Hall", "Ryan Hall", "Off-campus"]
 STATES = ['AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA', 'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY']
-# Keys that a student must have to be defined as a complete user
 ALL_KEYS = ["ndlevel", "ndtoplevelprimarydepartment", "ndcurriculum", "uid", "ndformalname", "mail", "ndadditionaltitleinfo", "ndaffiliation", "title", "nddepartment", "ndtitle", "departmentnumber" ]
 
 pos1 = {}
@@ -87,7 +86,7 @@ def remove_connection(G, connection):
             pass
     G.remove_nodes_from(delete_nodes)
 
-def add_new_user(netid):
+def add_new_user(server, netid):
 	try:
 		r = requests.get("http://ur.nd.edu/request/eds.php?uid={}&full_response=true".format(str(netid)))
 		raw_student_info = json.loads(r.content.decode("utf-8"))
@@ -134,11 +133,19 @@ def add_new_user(netid):
 			del info["ndadditionaltitleinfo"]
 		info["jobs"] = list(jobs) # Create new key "jobs" with value of a set of jobs	
 
-		r= requests.put("http://ash.campus.nd.edu:40440/students/"+netid, data = json.dumps(info))
+		if (server): 
+			r = requests.put("http://ash.campus.nd.edu:40440/students/"+netid, data = json.dumps(info))
+		else: 
+			with open("ND_database.json") as f: 
+				student_big_dir = json.load(f)
+			student_big_dir[netid] = info
+			output = open("ND_database.json", "w")
+			output.write(json.dumps(student_big_dir))
+			output.close()
 
-		if (add_dorm(netid)):
+		if (add_dorm(server, netid)):
 			return -1
-		if (add_homestate(netid)):
+		if (add_homestate(server, netid)):
 			return -1
 		return 0
 
@@ -147,10 +154,29 @@ def add_new_user(netid):
 		return -1
 
 
-def add_dorm(netid):
-	try:
-		r = requests.get("http://ash.campus.nd.edu:40440/students/"+netid)
-		student_info = json.loads(r.content.decode("utf-8"))["data"]
+def add_dorm(server, netid):
+	if (server):
+		try:
+			r = requests.get("http://ash.campus.nd.edu:40440/students/"+netid)
+			student_info = json.loads(r.content.decode("utf-8"))["data"]
+			dorm = raw_input("Enter dorm: ")
+			while (dorm not in ALL_DORMS):
+				print "Invalid dorm. Below are the valid options"
+				for d in ALL_DORMS:
+					print "- {}".format(d)
+				dorm = raw_input("Enter dorm: ")
+			student_info["dorm"] = dorm
+			r = requests.put("http://ash.campus.nd.edu:40440/students/"+netid, data = json.dumps(student_info))
+		except Exception as ex:
+			print "Error adding dorm: {}".format(ex)
+			return -1
+	else:
+		with open("ND_database.json") as f: 
+			student_big_dir = json.load(f)
+		#student_big_dir[netid] = student_info
+		student_info = student_big_dir[netid]
+
+
 		dorm = raw_input("Enter dorm: ")
 		while (dorm not in ALL_DORMS):
 			print "Invalid dorm. Below are the valid options"
@@ -158,16 +184,34 @@ def add_dorm(netid):
 				print "- {}".format(d)
 			dorm = raw_input("Enter dorm: ")
 		student_info["dorm"] = dorm
-		r = requests.put("http://ash.campus.nd.edu:40440/students/"+netid, data = json.dumps(student_info))
-		return 0
-	except Exception as ex:
-		print "Error adding dorm: {}".format(ex)
-		return -1
 
-def add_homestate(netid):
-	try:
-		r = requests.get("http://ash.campus.nd.edu:40440/students/"+netid)
-		student_info = json.loads(r.content.decode("utf-8"))["data"]
+		output = open("ND_database.json", "w")
+		output.write(json.dumps(student_big_dir))
+		output.close()
+	return 0
+
+
+def add_homestate(server, netid):
+	if (server):
+		try:
+			r = requests.get("http://ash.campus.nd.edu:40440/students/"+netid)
+			student_info = json.loads(r.content.decode("utf-8"))["data"]
+			state = raw_input("Enter homestate abbreviation: ")
+			while (state not in STATES):
+				print "Invalid dorm. Below are the valid options"
+				for s in STATES:
+					print "- {}".format(s)
+				state = raw_input("Enter homestate abbreviation: ")
+			student_info["homestate"] = state
+			r = requests.put("http://ash.campus.nd.edu:40440/students/"+netid, data = json.dumps(student_info))
+		except Exception as ex:
+			print "Error adding homestate: {}".format(ex)
+			return -1
+
+	else:
+		with open("ND_database.json") as f: 
+			student_big_dir = json.load(f)
+		student_info = student_big_dir[netid]
 		state = raw_input("Enter homestate abbreviation: ")
 		while (state not in STATES):
 			print "Invalid dorm. Below are the valid options"
@@ -175,13 +219,13 @@ def add_homestate(netid):
 				print "- {}".format(s)
 			state = raw_input("Enter homestate abbreviation: ")
 		student_info["homestate"] = state
-		r = requests.put("http://ash.campus.nd.edu:40440/students/"+netid, data = json.dumps(student_info))
-		return 0
-	except Exception as ex:
-		print "Error adding homestate: {}".format(ex)
-		return -1
-
-def get_directory():
+		output = open("ND_database.json", "w")
+		output.write(json.dumps(student_big_dir))
+		output.close()
+	return 0
+	
+def init_get_directory():
+	server = True
     # Try to load data from server
 	try:
 		r = requests.get("http://ash.campus.nd.edu:40440/students/")
@@ -190,35 +234,51 @@ def get_directory():
 
 	# If server is down, load from file
 	except: 
-		with open("ND_complete_directory.json") as f: 
+		with open("ND_database.json") as f: 
+			student_big_dir = json.load(f)
+		print "Loading data from file"
+		server = False
+	return server, student_big_dir
+
+def get_directory(server):
+	if (server):
+		try:
+		# Try to load data from server
+			r = requests.get("http://ash.campus.nd.edu:40440/students/")
+			student_big_dir = json.loads(r.content.decode("utf-8"))["data"]
+			print "Loading data from server"
+		except: 
+			print "Error loading from server"
+	else:
+		with open("ND_database.json") as f: 
 			student_big_dir = json.load(f)
 		print "Loading data from file"
 	return student_big_dir
 
 if __name__=='__main__':
 
-	student_big_dir = get_directory()
+	server, student_big_dir = init_get_directory()
 	student_dir = {}
 
 	Ego_id = raw_input("Enter valid netid: ")
 	# Check if user is in the online database
 	if (Ego_id not in student_big_dir.keys()):
-		status = add_new_user(Ego_id)
+		status = add_new_user(server, Ego_id)
 		if (status != 0):
 			sys.exit(1)
-		student_big_dir = get_directory()
+		student_big_dir = get_directory(server)
 	# Check if user has dorm field
 	elif ("dorm" not in student_big_dir[Ego_id].keys()):
-		status = add_dorm(Ego_id)
+		status = add_dorm(server, Ego_id)
 		if (status != 0): 
 			sys.exit(1)
-		student_big_dir = get_directory()
+		student_big_dir = get_directory(server)
 	# Check if user has home state field
 	elif ("homestate" not in student_big_dir[Ego_id].keys()):
-		status = add_homestate(Ego_id)
+		status = add_homestate(server, Ego_id)
 		if (status != 0):
 			sys.exit(1)
-		student_big_dir = get_directory()
+		student_big_dir = get_directory(server)
 
 	# Ask user which connection to see
 	connection = raw_input("Enter a connection type: ")
