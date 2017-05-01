@@ -48,9 +48,9 @@ if __name__ == "__main__":
 	while 1:
 		selection = raw_input('''Choose an action: 
 1.) Enter a NetID and get information associated with the NetID if it exists
-2.) Get all keys 
-3.) Get all values associated with the given key
-4.) Get all students associated with a key value pairi
+2.) Get all keys for student information
+3.) Get all values associated with the given key for student information
+4.) Get all students associated with a key value pair of student information
 5.) Exit program\n''')
 		if selection == "1":
 			student = raw_input("Get more details of a student. Enter a netid: ")
