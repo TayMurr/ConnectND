@@ -1,3 +1,6 @@
+# Student database class
+# Author: Mimi Chen
+
 import operator
 import json
 

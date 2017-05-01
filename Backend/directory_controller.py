@@ -1,3 +1,6 @@
+# Controller for handling GET and PUT 
+# Author: Mimi Chen
+
 import json
 import cherrypy
 
@@ -25,8 +28,7 @@ class DirectoryController(object):
 		'''Retrieve everything in directory'''
 		output = {'result':'success'}
 		try: 
-		        output['data'] = self.sd.get_all()
-			#return json.dumps(self.sd.get_all())
+			output['data'] = self.sd.get_all()
 		except Exception as ex:
 			output['result'] = 'error'
 			output['message'] = str(ex)
@@ -34,20 +36,17 @@ class DirectoryController(object):
 		return json.dumps(output)
 
 	def PUT_NETID(self, netid):
-                '''Given a student's NetID and his or her information, add to the database'''
-                output = {'result': 'success'}
-                thebody = cherrypy.request.body.read().decode()
-                try: 
-	        # Put everything in the body into the student_info dictionary
-	        #for key, item in thebody.items():
-	        #    student_info[key] = item
-	        # Pass into database
-                        student_info = json.loads(thebody)
-                        self.sd.add_student(netid, student_info)
-                        self.sd.update_file()
-                except Exception as ex:
-                        output['result'] = 'EEEEError'
-                        output['message'] = str(ex)
-                return json.dumps(output)
+		'''Given a student's NetID and his or her information, add to the database'''
+		output = {'result': 'success'}
+		thebody = cherrypy.request.body.read().decode()
+		try: 
+		# Put everything in the body into the student_info dictionary
+			student_info = json.loads(thebody)
+			self.sd.add_student(netid, student_info)
+			self.sd.update_file()
+		except Exception as ex:
+			output['result'] = 'Error'
+			output['message'] = str(ex)
+		return json.dumps(output)
 
 

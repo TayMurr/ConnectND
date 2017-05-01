@@ -1,3 +1,6 @@
+# Start cherrypy service for student directory database
+# Author: Mimi Chen
+
 import cherrypy
 
 from _student_database import _student_database
