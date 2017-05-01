@@ -1,6 +1,7 @@
 #!/usr/bin/env python2.7
 # ConnectND Annotate
-# Author: Taylor Murray
+# NetworkX Author: Taylor Murray
+# Database Adding Author: Mimi Chen
 
 # The purpose of this program in addition to our final project is to show that the Annotate class is working correctly
 # when the program prompts you for a valid netid use the netid mchen6
@@ -18,7 +19,12 @@ import numpy as np
 from random import randint
 import requests
 
-keys = ['dorm']
+CONNECTIONS = ['dorm', 'homestate']
+ALL_DORMS = ["Carroll Hall", "Knott Hall", "Flaherty Hall", "Sorin Hall", "Howard Hall", "Duncan Hall", "Breen-Phillips Hall", "Siegfried Hall", "Flanner Hall","Fisher Hall", "Badin Hall", "Lyons Hall", "Cavanaugh Hall", "Morrissey Hall","Pasquerilla West Hall", "McGlinn Hall", "Lewis Hall", "Dillon Hall", "Farley Hall", "Pasquerilla East Hall", "Welsh Family Hall", "O'Neill Hall", "Stanford Hall", "Keenan Hall", "Zahm Hall", "Keough Hall", "St. Edward's Hall","Dunne Hall", "Pangborn Hall", "Alumni Hall", "Ryan Hall", "Off-campus"]
+STATES = ['AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA', 'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY']
+# Keys that a student must have to be defined as a complete user
+ALL_KEYS = ["ndlevel", "ndtoplevelprimarydepartment", "ndcurriculum", "uid", "ndformalname", "mail", "ndadditionaltitleinfo", "ndaffiliation", "title", "nddepartment", "ndtitle", "departmentnumber" ]
+
 pos1 = {}
 student_dir = {}
 Ego_id =''
@@ -64,7 +70,6 @@ def add_connection(Ego, Ego_id, student_dir, G, connection):
     '''Adds students with the given connection and redraws graph'''
     # create node and edge and set node attributes
     for student in student_dir:
-        i
         if Ego[connection] == student_dir[student][connection]:
             G.add_edge(Ego_id, student)
             G.node[student][connection] = connection
@@ -82,8 +87,101 @@ def remove_connection(G, connection):
             pass
     G.remove_nodes_from(delete_nodes)
 
-if __name__=='__main__':
+def add_new_user(netid):
+	try:
+		r = requests.get("http://ur.nd.edu/request/eds.php?uid={}&full_response=true".format(str(netid)))
+		raw_student_info = json.loads(r.content.decode("utf-8"))
+		info = {}
+		for k in ALL_KEYS:
+			if k in raw_student_info.keys():
+				info[k] = raw_student_info[k]
 
+		# Combine college and curriculum
+		college = set()
+
+		if "ndtoplevelprimarydepartment" in info.keys():
+			college.add(info["ndtoplevelprimarydepartment"])
+			del info["ndtoplevelprimarydepartment"]
+		if "ndcurriculum" in info.keys():
+			college.add(info["ndcurriculum"])
+			del info["ndcurriculum"]
+
+		info["college"] = list(college)
+
+		# Combine work departments
+		work_department = set() # set to hold unique student work departments
+		if "nddepartment" in info.keys():
+			depart = info["nddepartment"]
+			work_department.add(depart)
+			del info["nddepartment"]
+		if "departmentnumber" in info.keys():
+			depart = info["departmentnumber"]
+			work_department.add(depart)
+			del info["departmentnumber"]
+
+		info["workdepartment"] = list(work_department)
+		
+		# Combine student jobs
+		jobs = set() # set to hold unique student jobs 
+		if "ndtitle" in info.keys():
+			jobs.add( info["ndtitle"] )
+			del info["ndtitle"] 
+		if "title" in info.keys():
+			jobs.add( info["title"])
+			del info["title"]
+		if "ndadditionaltitleinfo" in info.keys():
+			jobs.add( info["ndadditionaltitleinfo"])
+			del info["ndadditionaltitleinfo"]
+		info["jobs"] = list(jobs) # Create new key "jobs" with value of a set of jobs	
+
+		r= requests.put("http://ash.campus.nd.edu:40440/students/"+netid, data = json.dumps(info))
+
+		if (add_dorm(netid)):
+			return -1
+		if (add_homestate(netid)):
+			return -1
+		return 0
+
+	except Exception as ex:
+		print "Error adding new user: {}".format(ex)
+		return -1
+
+
+def add_dorm(netid):
+	try:
+		r = requests.get("http://ash.campus.nd.edu:40440/students/"+netid)
+		student_info = json.loads(r.content.decode("utf-8"))["data"]
+		dorm = raw_input("Enter dorm: ")
+		while (dorm not in ALL_DORMS):
+			print "Invalid dorm. Below are the valid options"
+			for d in ALL_DORMS:
+				print "- {}".format(d)
+			dorm = raw_input("Enter dorm: ")
+		student_info["dorm"] = dorm
+		r = requests.put("http://ash.campus.nd.edu:40440/students/"+netid, data = json.dumps(student_info))
+		return 0
+	except Exception as ex:
+		print "Error adding dorm: {}".format(ex)
+		return -1
+
+def add_homestate(netid):
+	try:
+		r = requests.get("http://ash.campus.nd.edu:40440/students/"+netid)
+		student_info = json.loads(r.content.decode("utf-8"))["data"]
+		state = raw_input("Enter homestate abbreviation: ")
+		while (state not in STATES):
+			print "Invalid dorm. Below are the valid options"
+			for s in STATES:
+				print "- {}".format(s)
+			state = raw_input("Enter homestate abbreviation: ")
+		student_info["homestate"] = state
+		r = requests.put("http://ash.campus.nd.edu:40440/students/"+netid, data = json.dumps(student_info))
+		return 0
+	except Exception as ex:
+		print "Error adding homestate: {}".format(ex)
+		return -1
+
+def get_directory():
     # Try to load data from server
 	try:
 		r = requests.get("http://ash.campus.nd.edu:40440/students/")
@@ -95,23 +193,58 @@ if __name__=='__main__':
 		with open("ND_complete_directory.json") as f: 
 			student_big_dir = json.load(f)
 		print "Loading data from file"
-	
+	return student_big_dir
+
+if __name__=='__main__':
+
+	student_big_dir = get_directory()
 	student_dir = {}
+
+	Ego_id = raw_input("Enter valid netid: ")
+	# Check if user is in the online database
+	if (Ego_id not in student_big_dir.keys()):
+		status = add_new_user(Ego_id)
+		if (status != 0):
+			sys.exit(1)
+		student_big_dir = get_directory()
+	# Check if user has dorm field
+	elif ("dorm" not in student_big_dir[Ego_id].keys()):
+		status = add_dorm(Ego_id)
+		if (status != 0): 
+			sys.exit(1)
+		student_big_dir = get_directory()
+	# Check if user has home state field
+	elif ("homestate" not in student_big_dir[Ego_id].keys()):
+		status = add_homestate(Ego_id)
+		if (status != 0):
+			sys.exit(1)
+		student_big_dir = get_directory()
+
+	# Ask user which connection to see
+	connection = raw_input("Enter a connection type: ")
+	while (connection not in CONNECTIONS):
+		print "Invalid connections. Below are valid connections:"
+		for c in CONNECTIONS:
+			print "- {}".format(c)
+		connection = raw_input("Enter a connection type: ")
+
+	# Create dictionary of all students who share the desired connection
 	for student in student_big_dir:
 		try:
-			if set(keys).issubset(set(student_big_dir[student].keys())):
-				student_dir[student_big_dir[student]["uid"]] = student_big_dir[student]
+			if connection in student_big_dir[student].keys():
+				student_dir[student] = student_big_dir[student]
 		except:
 			pass
-	Ego_id = raw_input("Enter valid netid: ")
+
 	try:
 		Ego = student_dir.pop(Ego_id)
-	except:
+	except Exception as ex:
 		sys.exit('Not a valid netid')
 	
 	G = nx.Graph()
 	for student in student_dir:
-		if Ego["dorm"] == student_dir[student]["dorm"]:
+		#if Ego["dorm"] == student_dir[student]["dorm"]:
+		if Ego[connection] == student_dir[student][connection]:
 			G.add_edge(Ego_id, student)
 	
                           
