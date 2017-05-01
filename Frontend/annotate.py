@@ -159,12 +159,12 @@ def add_dorm(server, netid):
 		try:
 			r = requests.get("http://ash.campus.nd.edu:40440/students/"+netid)
 			student_info = json.loads(r.content.decode("utf-8"))["data"]
-			dorm = raw_input("Enter dorm: ")
+			dorm = raw_input("> Enter dorm: ")
 			while (dorm not in ALL_DORMS):
 				print "Invalid dorm. Below are the valid options"
 				for d in ALL_DORMS:
 					print "- {}".format(d)
-				dorm = raw_input("Enter dorm: ")
+				dorm = raw_input("> Enter dorm: ")
 			student_info["dorm"] = dorm
 			r = requests.put("http://ash.campus.nd.edu:40440/students/"+netid, data = json.dumps(student_info))
 		except Exception as ex:
@@ -177,12 +177,12 @@ def add_dorm(server, netid):
 		student_info = student_big_dir[netid]
 
 
-		dorm = raw_input("Enter dorm: ")
+		dorm = raw_input("> Enter dorm: ")
 		while (dorm not in ALL_DORMS):
 			print "Invalid dorm. Below are the valid options"
 			for d in ALL_DORMS:
 				print "- {}".format(d)
-			dorm = raw_input("Enter dorm: ")
+			dorm = raw_input("> Enter dorm: ")
 		student_info["dorm"] = dorm
 
 		output = open("ND_database.json", "w")
@@ -196,12 +196,12 @@ def add_homestate(server, netid):
 		try:
 			r = requests.get("http://ash.campus.nd.edu:40440/students/"+netid)
 			student_info = json.loads(r.content.decode("utf-8"))["data"]
-			state = raw_input("Enter homestate abbreviation: ")
+			state = raw_input("> Enter homestate abbreviation: ")
 			while (state not in STATES):
 				print "Invalid dorm. Below are the valid options"
 				for s in STATES:
 					print "- {}".format(s)
-				state = raw_input("Enter homestate abbreviation: ")
+				state = raw_input("> Enter homestate abbreviation: ")
 			student_info["homestate"] = state
 			r = requests.put("http://ash.campus.nd.edu:40440/students/"+netid, data = json.dumps(student_info))
 		except Exception as ex:
@@ -212,12 +212,12 @@ def add_homestate(server, netid):
 		with open("ND_database.json") as f: 
 			student_big_dir = json.load(f)
 		student_info = student_big_dir[netid]
-		state = raw_input("Enter homestate abbreviation: ")
+		state = raw_input("> Enter homestate abbreviation: ")
 		while (state not in STATES):
 			print "Invalid dorm. Below are the valid options"
 			for s in STATES:
 				print "- {}".format(s)
-			state = raw_input("Enter homestate abbreviation: ")
+			state = raw_input("> Enter homestate abbreviation: ")
 		student_info["homestate"] = state
 		output = open("ND_database.json", "w")
 		output.write(json.dumps(student_big_dir))
@@ -260,7 +260,7 @@ if __name__=='__main__':
 	server, student_big_dir = init_get_directory()
 	student_dir = {}
 
-	Ego_id = raw_input("Enter valid netid: ")
+	Ego_id = raw_input("> Enter valid netid: ")
 	# Check if user is in the online database
 	if (Ego_id not in student_big_dir.keys()):
 		status = add_new_user(server, Ego_id)
@@ -281,12 +281,12 @@ if __name__=='__main__':
 		student_big_dir = get_directory(server)
 
 	# Ask user which connection to see
-	connection = raw_input("Enter a connection type: ")
+	connection = raw_input("> Enter a connection type: ")
 	while (connection not in CONNECTIONS):
 		print "Invalid connections. Below are valid connections:"
 		for c in CONNECTIONS:
 			print "- {}".format(c)
-		connection = raw_input("Enter a connection type: ")
+		connection = raw_input("> Enter a connection type: ")
 
 	# Create dictionary of all students who share the desired connection
 	for student in student_big_dir:
