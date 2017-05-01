@@ -25,7 +25,9 @@ def get_values_given_key(desired_key):
 	print "All values associated with the key {}".format(desired_key)
 
 	for v in values:
-		print "-{}".format(v)
+		#print "-{}".format(v)
+		print "\"{}\",".format(v),
+	print "\n"
 
 	return values
 

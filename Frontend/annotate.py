@@ -19,14 +19,16 @@ import numpy as np
 from random import randint
 import requests
 
-CONNECTIONS = ['dorm', 'homestate']
+CONNECTIONS = ['dorm', 'homestate', 'ndlevel']
 ALL_DORMS = ["Carroll Hall", "Knott Hall", "Flaherty Hall", "Sorin Hall", "Howard Hall", "Duncan Hall", "Breen-Phillips Hall", "Siegfried Hall", "Flanner Hall","Fisher Hall", "Badin Hall", "Lyons Hall", "Cavanaugh Hall", "Morrissey Hall","Pasquerilla West Hall", "McGlinn Hall", "Lewis Hall", "Dillon Hall", "Farley Hall", "Pasquerilla East Hall", "Welsh Family Hall", "O'Neill Hall", "Stanford Hall", "Keenan Hall", "Zahm Hall", "Keough Hall", "St. Edward's Hall","Dunne Hall", "Pangborn Hall", "Alumni Hall", "Ryan Hall", "Off-campus"]
 STATES = ['AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA', 'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY']
 ALL_KEYS = ["ndlevel", "ndtoplevelprimarydepartment", "ndcurriculum", "uid", "ndformalname", "mail", "ndadditionaltitleinfo", "ndaffiliation", "title", "nddepartment", "ndtitle", "departmentnumber" ]
+ND_LEVEL = ["Architecture Senior", "Chicago EMBA", "Masters Graduate Business", "Third Year Law", "First Year Law", "Master of Accountancy", "Graduate- PhD.", "Sophomore", "Non-Degree Student", "Executive MBA First Year", "First Year MBA", "Executive MBA Second Year", "Second Year Law", "Second Year MBA", "Freshman", "MNA", "Senior", "Graduate- Masters", "Junior", "Staff"]
 
 pos1 = {}
 student_dir = {}
 Ego_id =''
+connection= ''
 class Annotate(object):
     """Annoate when rolling over a node"""
     def __init__(self,G, ax=None):
@@ -44,9 +46,9 @@ class Annotate(object):
         #get info about node create a string. if you have name of node you can do anyting
         try:
 		
-            get_node = 'Connection:\n{}\n{}\n{}\n{}\n{}'.format(student_dir[node]['ndformalname'],  student_dir[node]['ndlevel'], student_dir[node]['college'][0], student_dir[node]['dorm'],  student_dir[node]['mail'])
+            get_node = 'Connection:\n{}\n{}\n{}\n{}\n{}'.format(student_dir[node]['ndformalname'],  student_dir[node]['ndlevel'], student_dir[node]['college'][0], student_dir[node][connection],  student_dir[node]['mail'])
         except:
-            get_node = '{}\n{}\n{}\n{}\n{}\n'.format(Ego['ndformalname'],  Ego['ndlevel'], Ego['college'][0], Ego['dorm'],  Ego['mail'])
+            get_node = '{}\n{}\n{}\n{}\n{}\n'.format(Ego['ndformalname'],  Ego['ndlevel'], Ego['college'][0], Ego[connection],  Ego['mail'])
 
         annotation = self.ax.annotate(get_node, xy=(x1,y1), bbox = dict(boxstyle = 'round,pad=0.5', fc = 'yellow', alpha=0.5))
         annotation.set_visible(False)
@@ -133,6 +135,18 @@ def add_new_user(server, netid):
 			del info["ndadditionaltitleinfo"]
 		info["jobs"] = list(jobs) # Create new key "jobs" with value of a set of jobs	
 
+		if "ndlevel" not in info.keys():
+			print "Below are possible ND levels:"
+			for l in ND_LEVEL:
+				print "- {}".format(l)
+			ndlvl = raw_input("Enter a ND level: ")
+			while (ndlvl not in ND_LEVEL):
+				print "Invalid ND level. Below are the valid options:"
+				for l in ND_LEVEL:
+					print "- {}".format(l)
+				ndlvl = raw_input("Enter a ND level: ")
+			info["ndlevel"] = ndlvl
+
 		if (server): 
 			r = requests.put("http://ash.campus.nd.edu:40440/students/"+netid, data = json.dumps(info))
 		else: 
@@ -153,6 +167,39 @@ def add_new_user(server, netid):
 		print "Error adding new user: {}".format(ex)
 		return -1
 
+def add_ndlevel(server, netid):
+	if (server):
+		try:
+			r = requests.get("http://ash.campus.nd.edu:40440/students/"+netid)
+			student_info = json.loads(r.content.decode("utf-8"))["data"]
+			ndlvl = raw_input("> Enter ND Level: ")
+			while (ndlvl not in ND_LEVEL):
+				print "Invalid ND level. Below are the valid options"
+				for l in ND_LEVEL:
+					print "- {}".format(l)
+				ndlvl = raw_input("Enter a ND level: ")
+			student_info["ndlevel"] = ndlvl
+			r = requests.put("http://ash.campus.nd.edu:40440/students/"+netid, data = json.dumps(student_info))
+		except Exception as ex:
+			print "Error adding nd level: {}".format(ex)
+			return -1
+	else:
+		with open("ND_database.json") as f: 
+			student_big_dir = json.load(f)
+		student_info = student_big_dir[netid]
+
+		ndlvl = raw_input("> Enter ND Level: ")
+		while (ndlvl not in ND_LEVEL):
+			print "Invalid ND level. Below are the valid options"
+			for l in ND_LEVEL:
+				print "- {}".format(l)
+			ndlvl = raw_input("Enter a ND level: ")
+		student_info["ndlevel"] = ndlvl
+
+		output = open("ND_database.json", "w")
+		output.write(json.dumps(student_big_dir))
+		output.close()
+	return 0
 
 def add_dorm(server, netid):
 	if (server):
@@ -279,6 +326,11 @@ if __name__=='__main__':
 		if (status != 0):
 			sys.exit(1)
 		student_big_dir = get_directory(server)
+	elif ("ndlevel" not in student_big_dir[Ego_id].keys()):
+		status = add_ndlevel(server, Ego_id)
+		if (status != 0):
+			sys.exit(1)
+		student_big_dir = get_directory(server)
 
 	# Ask user which connection to see
 	connection = raw_input("> Enter a connection type: ")
@@ -287,12 +339,23 @@ if __name__=='__main__':
 		for c in CONNECTIONS:
 			print "- {}".format(c)
 		connection = raw_input("> Enter a connection type: ")
+	#connection_list = []
+	#print "Say yes ('y') or no ('n') to creating graph with the connection:"
+	#for c in CONNECTIONS:
+#		add = raw_input("- {}?".format(c))
+#		while (add != 'y' and  add != 'n'):
+#			add = raw_input("Enter 'y' or 'n':")
+#		if (add == 'y'):
+#			connection_list.append(c)
+#			connection = c
 
 	# Create dictionary of all students who share the desired connection
 	for student in student_big_dir:
 		try:
 			if connection in student_big_dir[student].keys():
+			#if set(connection_list).issubset(set(student_big_dir[student].keys())):
 				student_dir[student] = student_big_dir[student]
+
 		except:
 			pass
 
@@ -307,7 +370,6 @@ if __name__=='__main__':
 		if Ego[connection] == student_dir[student][connection]:
 			G.add_edge(Ego_id, student)
 	
-                          
 	fig = figure()
 	ax = fig.add_subplot(111)
 	pos = nx.random_layout(G)
