@@ -45,7 +45,7 @@ class Annotate(object):
     def annotate(self, node, x1, y1):
         #get info about node create a string. if you have name of node you can do anyting
         try:
-		
+
             get_node = 'Connection:\n{}\n{}\n{}\n{}\n{}'.format(student_dir[node]['ndformalname'],  student_dir[node]['ndlevel'], student_dir[node]['college'][0], student_dir[node][connection],  student_dir[node]['mail'])
         except:
             get_node = '{}\n{}\n{}\n{}\n{}\n'.format(Ego['ndformalname'],  Ego['ndlevel'], Ego['college'][0], Ego[connection],  Ego['mail'])
@@ -74,7 +74,7 @@ def add_connection(Ego, Ego_id, student_dir, G, connection):
         if Ego[connection] == student_dir[student][connection]:
             G.add_edge(Ego_id, student)
             G.node[student][connection] = connection
-            
+
     # add nodes and edges from graph
 
 def remove_connection(G, connection):
@@ -121,36 +121,36 @@ def add_new_user(server, netid):
 			del info["departmentnumber"]
 
 		info["workdepartment"] = list(work_department)
-		
+
 		# Combine student jobs
-		jobs = set() # set to hold unique student jobs 
+		jobs = set() # set to hold unique student jobs
 		if "ndtitle" in info.keys():
 			jobs.add( info["ndtitle"] )
-			del info["ndtitle"] 
+			del info["ndtitle"]
 		if "title" in info.keys():
 			jobs.add( info["title"])
 			del info["title"]
 		if "ndadditionaltitleinfo" in info.keys():
 			jobs.add( info["ndadditionaltitleinfo"])
 			del info["ndadditionaltitleinfo"]
-		info["jobs"] = list(jobs) # Create new key "jobs" with value of a set of jobs	
+		info["jobs"] = list(jobs) # Create new key "jobs" with value of a set of jobs
 
 		if "ndlevel" not in info.keys():
-			print "Below are possible ND levels:"
+			print ("Below are possible ND levels:")
 			for l in ND_LEVEL:
-				print "- {}".format(l)
+				print ("- {}").format(l)
 			ndlvl = raw_input("Enter a ND level: ")
 			while (ndlvl not in ND_LEVEL):
-				print "Invalid ND level. Below are the valid options:"
+				print ("Invalid ND level. Below are the valid options:")
 				for l in ND_LEVEL:
-					print "- {}".format(l)
+					print ("- {}").format(l)
 				ndlvl = raw_input("Enter a ND level: ")
 			info["ndlevel"] = ndlvl
 
-		if (server): 
-			r = requests.put("http://ash.campus.nd.edu:40440/students/"+netid, data = json.dumps(info))
-		else: 
-			with open("ND_database.json") as f: 
+		if (server):
+			r = requests.put("http://127.0.0.1:40440/students/"+netid, data = json.dumps(info))
+		else:
+			with open("ND_database.json") as f:
 				student_big_dir = json.load(f)
 			student_big_dir[netid] = info
 			output = open("ND_database.json", "w")
@@ -164,35 +164,35 @@ def add_new_user(server, netid):
 		return 0
 
 	except Exception as ex:
-		print "Error adding new user: {}".format(ex)
+		print ("Error adding new user: {}").format(ex)
 		return -1
 
 def add_ndlevel(server, netid):
 	if (server):
 		try:
-			r = requests.get("http://ash.campus.nd.edu:40440/students/"+netid)
-			student_info = json.loads(r.content.decode("utf-8"))["data"]
+			r = requests.get("http://127.0.0.1:40440/students/"+netid)
+			student_info = json.loads(r.content.decode("utf-8"))#["data"]
 			ndlvl = raw_input("> Enter ND Level: ")
 			while (ndlvl not in ND_LEVEL):
-				print "Invalid ND level. Below are the valid options"
+				print ("Invalid ND level. Below are the valid options")
 				for l in ND_LEVEL:
-					print "- {}".format(l)
+					print ("- {}").format(l)
 				ndlvl = raw_input("Enter a ND level: ")
 			student_info["ndlevel"] = ndlvl
-			r = requests.put("http://ash.campus.nd.edu:40440/students/"+netid, data = json.dumps(student_info))
+			r = requests.put("http://127.0.0.1:40440/students/"+netid, data = json.dumps(student_info))
 		except Exception as ex:
-			print "Error adding nd level: {}".format(ex)
+			print ("Error adding nd level: {}").format(ex)
 			return -1
 	else:
-		with open("ND_database.json") as f: 
+		with open("ND_database.json") as f:
 			student_big_dir = json.load(f)
 		student_info = student_big_dir[netid]
 
 		ndlvl = raw_input("> Enter ND Level: ")
 		while (ndlvl not in ND_LEVEL):
-			print "Invalid ND level. Below are the valid options"
+			print ("Invalid ND level. Below are the valid options")
 			for l in ND_LEVEL:
-				print "- {}".format(l)
+				print ("- {}").format(l)
 			ndlvl = raw_input("Enter a ND level: ")
 		student_info["ndlevel"] = ndlvl
 
@@ -204,21 +204,21 @@ def add_ndlevel(server, netid):
 def add_dorm(server, netid):
 	if (server):
 		try:
-			r = requests.get("http://ash.campus.nd.edu:40440/students/"+netid)
-			student_info = json.loads(r.content.decode("utf-8"))["data"]
+			r = requests.get("http://127.0.0.1:40440/students/"+netid)
+			student_info = json.loads(r.content.decode("utf-8"))#["data"]
 			dorm = raw_input("> Enter dorm: ")
 			while (dorm not in ALL_DORMS):
-				print "Invalid dorm. Below are the valid options"
+				print ("Invalid dorm. Below are the valid options")
 				for d in ALL_DORMS:
-					print "- {}".format(d)
+					print ("- {}").format(d)
 				dorm = raw_input("> Enter dorm: ")
 			student_info["dorm"] = dorm
-			r = requests.put("http://ash.campus.nd.edu:40440/students/"+netid, data = json.dumps(student_info))
+			r = requests.put("http://127.0.0.1:40440/students/"+netid, data = json.dumps(student_info))
 		except Exception as ex:
-			print "Error adding dorm: {}".format(ex)
+			print ("Error adding dorm: {}").format(ex)
 			return -1
 	else:
-		with open("ND_database.json") as f: 
+		with open("ND_database.json") as f:
 			student_big_dir = json.load(f)
 		#student_big_dir[netid] = student_info
 		student_info = student_big_dir[netid]
@@ -226,9 +226,9 @@ def add_dorm(server, netid):
 
 		dorm = raw_input("> Enter dorm: ")
 		while (dorm not in ALL_DORMS):
-			print "Invalid dorm. Below are the valid options"
+			print ("Invalid dorm. Below are the valid options")
 			for d in ALL_DORMS:
-				print "- {}".format(d)
+				print ("- {}").format(d)
 			dorm = raw_input("> Enter dorm: ")
 		student_info["dorm"] = dorm
 
@@ -241,49 +241,49 @@ def add_dorm(server, netid):
 def add_homestate(server, netid):
 	if (server):
 		try:
-			r = requests.get("http://ash.campus.nd.edu:40440/students/"+netid)
-			student_info = json.loads(r.content.decode("utf-8"))["data"]
+			r = requests.get("http://127.0.0.1:40440/students/"+netid)
+			student_info = json.loads(r.content.decode("utf-8"))#["data"]
 			state = raw_input("> Enter homestate abbreviation: ")
 			while (state not in STATES):
-				print "Invalid dorm. Below are the valid options"
+				print ("Invalid dorm. Below are the valid options")
 				for s in STATES:
-					print "- {}".format(s)
+					print ("- {}").format(s)
 				state = raw_input("> Enter homestate abbreviation: ")
 			student_info["homestate"] = state
-			r = requests.put("http://ash.campus.nd.edu:40440/students/"+netid, data = json.dumps(student_info))
+			r = requests.put("http://127.0.0.1:40440/students/"+netid, data = json.dumps(student_info))
 		except Exception as ex:
-			print "Error adding homestate: {}".format(ex)
+			print ("Error adding homestate: {}").format(ex)
 			return -1
 
 	else:
-		with open("ND_database.json") as f: 
+		with open("ND_database.json") as f:
 			student_big_dir = json.load(f)
 		student_info = student_big_dir[netid]
 		state = raw_input("> Enter homestate abbreviation: ")
 		while (state not in STATES):
-			print "Invalid dorm. Below are the valid options"
+			print ("Invalid dorm. Below are the valid options")
 			for s in STATES:
-				print "- {}".format(s)
+				print ("- {}").format(s)
 			state = raw_input("> Enter homestate abbreviation: ")
 		student_info["homestate"] = state
 		output = open("ND_database.json", "w")
 		output.write(json.dumps(student_big_dir))
 		output.close()
 	return 0
-	
+
 def init_get_directory():
 	server = True
     # Try to load data from server
 	try:
-		r = requests.get("http://ash.campus.nd.edu:40440/students/")
+		r = requests.get("http://127.0.0.1:40440/students/")
 		student_big_dir = json.loads(r.content.decode("utf-8"))["data"]
-		print "Loading data from server"
+		print ("Loading data from server")
 
 	# If server is down, load from file
-	except: 
-		with open("ND_database.json") as f: 
+	except:
+		with open("ND_database.json") as f:
 			student_big_dir = json.load(f)
-		print "Loading data from file"
+		print ("Loading data from file")
 		server = False
 	return server, student_big_dir
 
@@ -291,15 +291,15 @@ def get_directory(server):
 	if (server):
 		try:
 		# Try to load data from server
-			r = requests.get("http://ash.campus.nd.edu:40440/students/")
+			r = requests.get("http://127.0.0.1:40440/students/")
 			student_big_dir = json.loads(r.content.decode("utf-8"))["data"]
-			print "Loading data from server"
-		except: 
-			print "Error loading from server"
+			print ("Loading data from server")
+		except:
+			print ("Error loading from server")
 	else:
-		with open("ND_database.json") as f: 
+		with open("ND_database.json") as f:
 			student_big_dir = json.load(f)
-		print "Loading data from file"
+		print ("Loading data from file")
 	return student_big_dir
 
 if __name__=='__main__':
@@ -317,7 +317,7 @@ if __name__=='__main__':
 	# Check if user has dorm field
 	elif ("dorm" not in student_big_dir[Ego_id].keys()):
 		status = add_dorm(server, Ego_id)
-		if (status != 0): 
+		if (status != 0):
 			sys.exit(1)
 		student_big_dir = get_directory(server)
 	# Check if user has home state field
@@ -335,9 +335,9 @@ if __name__=='__main__':
 	# Ask user which connection to see
 	connection = raw_input("> Enter a connection type: ")
 	while (connection not in CONNECTIONS):
-		print "Invalid connections. Below are valid connections:"
+		print ("Invalid connections. Below are valid connections:")
 		for c in CONNECTIONS:
-			print "- {}".format(c)
+			print ("- {}").format(c)
 		connection = raw_input("> Enter a connection type: ")
 	#connection_list = []
 	#print "Say yes ('y') or no ('n') to creating graph with the connection:"
@@ -363,13 +363,13 @@ if __name__=='__main__':
 		Ego = student_dir.pop(Ego_id)
 	except Exception as ex:
 		sys.exit('Not a valid netid')
-	
+
 	G = nx.Graph()
 	for student in student_dir:
 		#if Ego["dorm"] == student_dir[student]["dorm"]:
 		if Ego[connection] == student_dir[student][connection]:
 			G.add_edge(Ego_id, student)
-	
+
 	fig = figure()
 	ax = fig.add_subplot(111)
 	pos = nx.random_layout(G)
@@ -387,5 +387,4 @@ if __name__=='__main__':
 	fig.canvas.mpl_connect('motion_notify_event', af);
 	plt.show()
 
-	print 'Program has ended.'
-
+	print ('Program has ended.')
