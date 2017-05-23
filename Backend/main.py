@@ -29,7 +29,7 @@ def start_service():
 
 	# Settings for cherrypy and start server and event loop
 	conf = { 'global' : {
-		'server.socket_host': 'ash.campus.nd.edu',
+		'server.socket_host': '127.0.0.1',
 		'server.socket_port'  : 40440, 
 		},
 		'/' : { 'request.dispatch': dispatcher } 
