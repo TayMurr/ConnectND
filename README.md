@@ -27,26 +27,9 @@ NetIDs.
 
 Script that uses the JSON data in "ND\_directory.json"
 
-!!!!! NEEDS TO BE FINISHED !!!!!
-
 
 Things to complete
 ---------------------
 
-Access Facebook API --> user authenticatication
-
-Use user's Facebook friends and match with the students in the student directory
-- Filter Facebook friends for only ND associated friends
-
-Add layers on top of the Facebook friendships with school year, college, and the
-following information if available: dorm, major, jobs
-
-If there are missing fields, allow user to add for session: 
-	- dorm
-	- major
-	- jobs
-
-Ask if user wants information to be permanently added
-
-(Optional) Include ND people who are not your friends to your graph but have a 
-connection with you 
+- Bring Matplotlib graph to browser with mpld3
+- Deploy Flask on Cherrypy server
