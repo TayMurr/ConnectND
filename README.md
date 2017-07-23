@@ -31,5 +31,4 @@ Script that uses the JSON data in "ND\_directory.json"
 Things to complete
 ---------------------
 
-- Bring Matplotlib graph to browser with mpld3
-- Deploy Flask on Cherrypy server
+- Explore processing.py for visualization in browser
