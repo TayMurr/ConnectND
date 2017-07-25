@@ -31,4 +31,4 @@ Script that uses the JSON data in "ND\_directory.json"
 Things to complete
 ---------------------
 
-- modify Labels for node to interface with mpld3 
+- write mpld3 plugin to create label for ConnectND graph 
