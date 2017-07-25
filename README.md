@@ -31,4 +31,4 @@ Script that uses the JSON data in "ND\_directory.json"
 Things to complete
 ---------------------
 
-- Explore processing.py for visualization in browser
+- modify Labels for node to interface with mpld3 
